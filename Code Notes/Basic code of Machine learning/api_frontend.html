@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supervised Learning API - ٹیسٹ کریں</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .result h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .result p {
+            color: #666;
+            margin: 5px 0;
+        }
+        
+        .prediction {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .confidence {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            width: auto;
+        }
+        
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .metric-card {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .metric-card h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #f44336;
+            display: none;
+            margin-top: 15px;
+        }
+        
+        .error.show {
+            display: block;
+        }
+        
+        .feature-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: #f8f9fa;
+            margin: 5px 0;
+            border-radius: 3px;
+        }
+        
+        .feature-name {
+            flex: 1;
+        }
+        
+        .feature-bar {
+            flex: 2;
+            margin: 0 15px;
+            background: #ddd;
+            height: 20px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .feature-bar-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s;
+        }
+        
+        .feature-percent {
+            width: 50px;
+            text-align: left;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌸 Supervised Learning API ٹیسٹ پلیٹ فارم</h1>
+            <p>نگرانی سے سیکھنے کی ٹیسٹنگ کے لیے یہ پلیٹ فارم استعمال کریں</p>
+            <p style="font-size: 12px; margin-top: 10px; color: #999;">Status: <span id="status">🟡 چیک کر رہے ہیں...</span></p>
+        </div>
+        
+        <div class="main-content">
+            <!-- Prediction Section -->
+            <div class="card">
+                <h2>📊 پیش گوئی کریں</h2>
+                
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('rf')">Random Forest</button>
+                    <button class="tab-btn" onclick="switchTab('lr')">Logistic Regression</button>
+                </div>
+                
+                <div id="rf" class="tab-content active">
+                    <form onsubmit="predictRF(event)">
+                        <div class="form-group">
+                            <label>Sepal Length (بیرونی پنکھڑی کی لمبائی) cm</label>
+                            <input type="number" id="rf-sepal-length" step="0.1" value="5.1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Sepal Width (بیرونی پنکھڑی کی چوڑائی) cm</label>
+                            <input type="number" id="rf-sepal-width" step="0.1" value="3.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Petal Length (اندرونی پنکھڑی کی لمبائی) cm</label>
+                            <input type="number" id="rf-petal-length" step="0.1" value="1.4" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Petal Width (اندرونی پنکھڑی کی چوڑائی) cm</label>
+                            <input type="number" id="rf-petal-width" step="0.1" value="0.2" required>
+                        </div>
+                        <button type="submit">🔮 پیش گوئی کریں</button>
+                    </form>
+                </div>
+                
+                <div id="lr" class="tab-content">
+                    <form onsubmit="predictLR(event)">
+                        <div class="form-group">
+                            <label>Sepal Length (بیرونی پنکھڑی کی لمبائی) cm</label>
+                            <input type="number" id="lr-sepal-length" step="0.1" value="5.1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Sepal Width (بیرونی پنکھڑی کی چوڑائی) cm</label>
+                            <input type="number" id="lr-sepal-width" step="0.1" value="3.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Petal Length (اندرونی پنکھڑی کی لمبائی) cm</label>
+                            <input type="number" id="lr-petal-length" step="0.1" value="1.4" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Petal Width (اندرونی پنکھڑی کی چوڑائی) cm</label>
+                            <input type="number" id="lr-petal-width" step="0.1" value="0.2" required>
+                        </div>
+                        <button type="submit">🔮 پیش گوئی کریں</button>
+                    </form>
+                </div>
+                
+                <div class="loading" id="loading">⏳ براہ کرم انتظار کریں...</div>
+                <div class="error" id="error"></div>
+                <div class="result" id="result"></div>
+            </div>
+            
+            <!-- Metrics Section -->
+            <div class="card">
+                <h2>📈 ماڈل کی کارکردگی</h2>
+                <button onclick="getMetrics()">📊 Metrics لیں</button>
+                <div class="loading" id="metrics-loading">⏳ براہ کرم انتظار کریں...</div>
+                <div class="error" id="metrics-error"></div>
+                <div id="metrics" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+        
+        <!-- Feature Importance Section -->
+        <div class="card">
+            <h2>⭐ خصوصیات کی اہمیت</h2>
+            <button onclick="getFeatureImportance()">🎯 اہمیت دیکھیں</button>
+            <div class="loading" id="features-loading">⏳ براہ کرم انتظار کریں...</div>
+            <div class="error" id="features-error"></div>
+            <div id="features" style="margin-top: 20px;"></div>
+        </div>
+        
+        <!-- Data Info Section -->
+        <div class="card">
+            <h2>📋 ڈیٹا کی معلومات</h2>
+            <button onclick="getDataInfo()">ℹ️ معلومات لیں</button>
+            <div class="loading" id="info-loading">⏳ براہ کرم انتظار کریں...</div>
+            <div class="error" id="info-error"></div>
+            <div id="info" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = "http://localhost:8000";
+        
+        // Check API Health
+        async function checkHealth() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                if (response.ok) {
+                    document.getElementById('status').innerHTML = '🟢 API صحیح طریقے سے کام کر رہا ہے';
+                } else {
+                    document.getElementById('status').innerHTML = '🔴 API سے کنکشن میں مسئلہ';
+                }
+            } catch (error) {
+                document.getElementById('status').innerHTML = '🔴 API سے رابطہ نہیں ہو سکا';
+                console.error('Health check error:', error);
+            }
+        }
+        
+        // Switch Tabs
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Remove active class from buttons
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // Predict with Random Forest
+        async function predictRF(event) {
+            event.preventDefault();
+            
+            const data = {
+                sepal_length: parseFloat(document.getElementById('rf-sepal-length').value),
+                sepal_width: parseFloat(document.getElementById('rf-sepal-width').value),
+                petal_length: parseFloat(document.getElementById('rf-petal-length').value),
+                petal_width: parseFloat(document.getElementById('rf-petal-width').value)
+            };
+            
+            await makePrediction(data, 'random-forest');
+        }
+        
+        // Predict with Logistic Regression
+        async function predictLR(event) {
+            event.preventDefault();
+            
+            const data = {
+                sepal_length: parseFloat(document.getElementById('lr-sepal-length').value),
+                sepal_width: parseFloat(document.getElementById('lr-sepal-width').value),
+                petal_length: parseFloat(document.getElementById('lr-petal-length').value),
+                petal_width: parseFloat(document.getElementById('lr-petal-width').value)
+            };
+            
+            await makePrediction(data, 'logistic-regression');
+        }
+        
+        // Make Prediction
+        async function makePrediction(data, model) {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const result = document.getElementById('result');
+            
+            loading.style.display = 'block';
+            error.classList.remove('show');
+            result.classList.remove('show');
+            
+            try {
+                const response = await fetch(`${API_URL}/predict/${model}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('پیش گوئی میں خرابی ہوئی');
+                }
+                
+                const responseData = await response.json();
+                
+                let html = `
+                    <h3>✅ پیش گوئی کے نتائج</h3>
+                    <div class="prediction">
+                        <p><strong>پھول کی قسم:</strong> ${responseData.predicted_class}</p>
+                        <p><strong>معاون:</strong> ${(responseData.confidence * 100).toFixed(2)}%</p>
+                    </div>
+                    <h4>ہر قسم کا امکان:</h4>
+                `;
+                
+                for (const [className, probability] of Object.entries(responseData.probabilities)) {
+                    html += `
+                        <div class="feature-item">
+                            <span class="feature-name">${className}</span>
+                            <div class="feature-bar">
+                                <div class="feature-bar-fill" style="width: ${probability * 100}%"></div>
+                            </div>
+                            <span class="feature-percent">${(probability * 100).toFixed(1)}%</span>
+                        </div>
+                    `;
+                }
+                
+                result.innerHTML = html;
+                result.classList.add('show');
+            } catch (err) {
+                error.textContent = `❌ خرابی: ${err.message}`;
+                error.classList.add('show');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        // Get Metrics
+        async function getMetrics() {
+            const loading = document.getElementById('metrics-loading');
+            const error = document.getElementById('metrics-error');
+            const metricsDiv = document.getElementById('metrics');
+            
+            loading.style.display = 'block';
+            error.classList.remove('show');
+            metricsDiv.innerHTML = '';
+            
+            try {
+                const response = await fetch(`${API_URL}/metrics`);
+                
+                if (!response.ok) {
+                    throw new Error('Metrics لینے میں خرابی');
+                }
+                
+                const data = await response.json();
+                
+                let html = `
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <h4>Random Forest</h4>
+                            <div class="metric-value">${(data.random_forest.accuracy * 100).toFixed(2)}%</div>
+                        </div>
+                        <div class="metric-card">
+                            <h4>Logistic Regression</h4>
+                            <div class="metric-value">${(data.logistic_regression.accuracy * 100).toFixed(2)}%</div>
+                        </div>
+                    </div>
+                `;
+                
+                metricsDiv.innerHTML = html;
+            } catch (err) {
+                error.textContent = `❌ خرابی: ${err.message}`;
+                error.classList.add('show');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        // Get Feature Importance
+        async function getFeatureImportance() {
+            const loading = document.getElementById('features-loading');
+            const error = document.getElementById('features-error');
+            const featuresDiv = document.getElementById('features');
+            
+            loading.style.display = 'block';
+            error.classList.remove('show');
+            featuresDiv.innerHTML = '';
+            
+            try {
+                const response = await fetch(`${API_URL}/feature-importance`);
+                
+                if (!response.ok) {
+                    throw new Error('خصوصیات لینے میں خرابی');
+                }
+                
+                const data = await response.json();
+                
+                let html = '<h4>خصوصیات کی ترتیب (سب سے اہم سے):</h4>';
+                
+                data.features.forEach(feature => {
+                    html += `
+                        <div class="feature-item">
+                            <span class="feature-name">${feature.feature_name}</span>
+                            <div class="feature-bar">
+                                <div class="feature-bar-fill" style="width: ${feature.importance * 100}%"></div>
+                            </div>
+                            <span class="feature-percent">${feature.importance_percentage}</span>
+                        </div>
+                    `;
+                });
+                
+                featuresDiv.innerHTML = html;
+            } catch (err) {
+                error.textContent = `❌ خرابی: ${err.message}`;
+                error.classList.add('show');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        // Get Data Info
+        async function getDataInfo() {
+            const loading = document.getElementById('info-loading');
+            const error = document.getElementById('info-error');
+            const infoDiv = document.getElementById('info');
+            
+            loading.style.display = 'block';
+            error.classList.remove('show');
+            infoDiv.innerHTML = '';
+            
+            try {
+                const response = await fetch(`${API_URL}/data-info`);
+                
+                if (!response.ok) {
+                    throw new Error('معلومات لینے میں خرابی');
+                }
+                
+                const data = await response.json();
+                
+                let html = `
+                    <p><strong>Dataset کا نام:</strong> ${data.dataset_name}</p>
+                    <p><strong>کل ریکارڈز:</strong> ${data.total_records}</p>
+                    <p><strong>کل خصوصیات:</strong> ${data.total_features}</p>
+                    <p><strong>Training Samples:</strong> ${data.training_samples}</p>
+                    <p><strong>Testing Samples:</strong> ${data.testing_samples}</p>
+                    <p><strong>Split Ratio:</strong> ${data.train_test_split}</p>
+                    <h4 style="margin-top: 15px;">خصوصیات:</h4>
+                    <ul style="margin-right: 20px;">
+                `;
+                
+                data.features.forEach(feature => {
+                    html += `<li>${feature}</li>`;
+                });
+                
+                html += `
+                    </ul>
+                    <h4 style="margin-top: 15px;">Target Classes:</h4>
+                    <ul style="margin-right: 20px;">
+                `;
+                
+                data.target_classes.forEach(target => {
+                    html += `<li>${target}</li>`;
+                });
+                
+                html += `</ul>`;
+                
+                infoDiv.innerHTML = html;
+            } catch (err) {
+                error.textContent = `❌ خرابی: ${err.message}`;
+                error.classList.add('show');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        // Check health on page load
+        window.addEventListener('load', checkHealth);
+    </script>
+</body>
+</html>
